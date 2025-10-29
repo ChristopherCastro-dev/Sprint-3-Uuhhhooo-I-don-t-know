@@ -1,0 +1,2449 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Photo Fun Booth</title>
+    <style>
+        /* Base styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #6e8efb, #a777e3);
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+        
+        .kiosk-container {
+            width: 100%;
+            max-width: 1200px;
+            height: 90vh;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+        
+        /* Screen styles */
+        .screen {
+            flex: 1;
+            padding: 20px;
+            display: none;
+            flex-direction: column;
+            overflow-y: auto;
+        }
+        
+        .screen.active {
+            display: flex;
+        }
+        
+        /* Header styles */
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+            position: relative;
+        }
+        
+        .header h1 {
+            color: #ff6b6b;
+            font-size: 60px;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 0 rgba(0,0,0,0.1);
+        }
+        
+        .header p {
+            color: #555;
+            font-size: 20px;
+        }
+        
+        /* Content area */
+        .content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+            position: relative;
+        }
+        
+        /* Button styles */
+        .btn {
+            background: linear-gradient(to right, #ff6b6b, #ff8e8e);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            padding: 15px 30px;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(255, 107, 107, 0.4);
+            width: 80%;
+            max-width: 300px;
+            text-align: center;
+        }
+        
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(255, 107, 107, 0.6);
+        }
+        
+        .btn-secondary {
+            background: linear-gradient(to right, #4facfe, #00f2fe);
+        }
+        
+        .btn-large {
+            font-size: 1.5rem;
+            padding: 20px 40px;
+        }
+        
+        /* Print button style */
+        .btn-print {
+            background: linear-gradient(to right, #2ecc71, #27ae60);
+        }
+        
+        /* Admin button style */
+        .btn-admin {
+            background: linear-gradient(to right, #9b59b6, #8e44ad);
+        }
+        
+        /* Background selection */
+        .backgrounds {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 15px;
+            width: 100%;
+            max-width: 800px;
+        }
+        
+        .background {
+            aspect-ratio: 4/3;
+            border-radius: 10px;
+            overflow: hidden;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 3px solid transparent;
+        }
+        
+        .background:hover {
+            transform: scale(1.05);
+        }
+        
+        .background.selected {
+            border-color: #ff6b6b;
+            box-shadow: 0 0 15px rgba(255, 107, 107, 0.7);
+        }
+        
+        .bg-preview {
+            width: 100%;
+            height: 100%;
+            background-size: cover;
+            background-position: center;
+        }
+        
+        /* Options selection */
+        .options {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 15px;
+            width: 100%;
+            max-width: 600px;
+        }
+        
+        .option {
+            background: white;
+            border-radius: 15px;
+            padding: 15px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            flex: 1;
+            min-width: 120px;
+            max-width: 150px;
+        }
+        
+        .option:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 15px rgba(0,0,0,0.15);
+        }
+        
+        .option.selected {
+            background: #ff6b6b;
+            color: white;
+        }
+        
+        .option-icon {
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+        
+        /* Counter */
+        .counter {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+            margin: 20px 0;
+        }
+        
+        .counter-btn {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: #ff6b6b;
+            color: white;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .counter-value {
+            font-size: 2rem;
+            font-weight: bold;
+            min-width: 60px;
+            text-align: center;
+        }
+        
+        /* Form elements */
+        .input-group {
+            width: 100%;
+            max-width: 500px;
+            margin: 10px 0;
+        }
+        
+        .input-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #555;
+        }
+        
+        .text-input {
+            width: 100%;
+            padding: 15px;
+            border-radius: 10px;
+            border: 2px solid #ddd;
+            font-size: 1.1rem;
+            transition: border-color 0.3s;
+        }
+        
+        .text-input:focus {
+            border-color: #ff6b6b;
+            outline: none;
+        }
+        
+        /* Preview area */
+        .preview-container {
+            width: 100%;
+            max-width: 600px;
+            aspect-ratio: 4/3;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            margin: 20px 0;
+            position: relative;
+        }
+        
+        .preview-image {
+            width: 100%;
+            height: 100%;
+            background-size: cover;
+            background-position: center;
+        }
+        
+        /* Receipt styles */
+        .receipt {
+            background: white;
+            border: 2px dashed #ccc;
+            border-radius: 10px;
+            padding: 20px;
+            width: 100%;
+            max-width: 500px;
+            margin: 20px 0;
+        }
+        
+        .receipt h3 {
+            text-align: center;
+            margin-bottom: 15px;
+            color: #333;
+        }
+        
+        .receipt-line {
+            display: flex;
+            justify-content: space-between;
+            margin: 8px 0;
+            padding-bottom: 8px;
+            border-bottom: 1px dotted #ddd;
+        }
+        
+        /* Navigation */
+        .nav-buttons {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+            margin-top: 20px;
+            position: relative;
+            z-index: 100;
+        }
+        
+        /* Custom background upload */
+        .upload-area {
+            border: 3px dashed #ff6b6b;
+            border-radius: 15px;
+            padding: 30px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 20px 0;
+            width: 100%;
+            max-width: 500px;
+        }
+        
+        .upload-area:hover {
+            background: rgba(255, 107, 107, 0.1);
+        }
+        
+        .upload-icon {
+            font-size: 3rem;
+            color: #ff6b6b;
+            margin-bottom: 15px;
+        }
+        
+        /* Animation for screens */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .screen.active .content > * {
+            animation: fadeIn 0.5s ease forwards;
+        }
+        
+        /* NEW STYLES FOR ADDED FEATURES */
+        
+        /* Email input styles */
+        .email-inputs {
+            width: 100%;
+            max-width: 500px;
+        }
+        
+        .email-input {
+            margin-bottom: 10px;
+        }
+        
+        /* Order Confirmation Screen */
+        .confirmation-container {
+            text-align: center;
+            max-width: 600px;
+            padding: 30px;
+        }
+        
+        .order-number {
+            font-size: 4rem;
+            font-weight: bold;
+            color: #ff6b6b;
+            margin: 20px 0;
+            text-shadow: 2px 2px 0 rgba(0,0,0,0.1);
+        }
+        
+        .confirmation-message {
+            font-size: 1.5rem;
+            margin: 20px 0;
+            line-height: 1.6;
+            color: #555;
+        }
+        
+        .instructions {
+            font-size: 1.2rem;
+            margin: 20px 0;
+            padding: 20px;
+            background: #f0f8ff;
+            border-radius: 10px;
+            border-left: 5px solid #4facfe;
+        }
+        
+        .magic-text {
+            font-size: 1.8rem;
+            color: #ff6b6b;
+            font-weight: bold;
+            margin: 30px 0;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        
+        /* Two-part receipt styles */
+        .receipt-two-part {
+            display: flex;
+            gap: 20px;
+            width: 100%;
+            max-width: 800px;
+        }
+        
+        .receipt-part {
+            flex: 1;
+            background: white;
+            border: 2px dashed #ccc;
+            border-radius: 10px;
+            padding: 15px;
+        }
+        
+        .receipt-part.customer {
+            border-color: #4facfe;
+        }
+        
+        .receipt-part.cameraman {
+            border-color: #ff6b6b;
+            font-size: 0.9rem;
+        }
+        
+        .stamp-area {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin: 15px 0;
+        }
+        
+        .stamp {
+            width: 60px;
+            height: 60px;
+            border: 2px dashed #999;
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            text-align: center;
+            padding: 5px;
+        }
+        
+        .highlight {
+            background: #fffacd;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+        
+        /* Background Category Tabs */
+        .category-tabs {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        
+        .category-tab {
+            padding: 10px 20px;
+            background: #f0f0f0;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .category-tab.active {
+            background: #ff6b6b;
+            color: white;
+        }
+        
+        .background-category {
+            display: none;
+        }
+        
+        .background-category.active {
+            display: grid;
+        }
+        
+        /* Background Preview on Receipt */
+        .receipt-bg-preview {
+            width: 100%;
+            height: 120px;
+            margin: 10px 0;
+            border-radius: 5px;
+            overflow: hidden;
+            border: 1px solid #ddd;
+        }
+        
+        .receipt-bg-preview img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        /* Print-specific styles */
+        @media print {
+            body * {
+                visibility: hidden;
+            }
+            .receipt-two-part, .receipt-two-part * {
+                visibility: visible;
+            }
+            .receipt-two-part {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+            }
+            .btn {
+                display: none !important;
+            }
+        }
+        
+        /* Hidden Admin Area */
+        .admin-corner {
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 80px;
+            height: 80px;
+            z-index: 1000;
+            background: transparent;
+            cursor: pointer;
+        }
+        
+        /* Admin Modal Styles */
+        .admin-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .admin-modal.active {
+            display: flex;
+        }
+        
+        .admin-content {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            width: 90%;
+            max-width: 500px;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+        
+        .admin-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #eee;
+        }
+        
+        .admin-title {
+            font-size: 1.8rem;
+            color: #9b59b6;
+            margin: 0;
+        }
+        
+        .close-admin {
+            background: none;
+            border: none;
+            font-size: 2rem;
+            cursor: pointer;
+            color: #999;
+            transition: color 0.3s;
+        }
+        
+        .close-admin:hover {
+            color: #ff6b6b;
+        }
+        
+        .admin-section {
+            margin-bottom: 25px;
+        }
+        
+        .admin-section h3 {
+            color: #555;
+            margin-bottom: 15px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .admin-input-group {
+            margin-bottom: 15px;
+        }
+        
+        .admin-label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #666;
+        }
+        
+        .admin-input {
+            width: 100%;
+            padding: 10px;
+            border-radius: 8px;
+            border: 2px solid #ddd;
+            font-size: 1rem;
+        }
+        
+        .admin-input:focus {
+            border-color: #9b59b6;
+            outline: none;
+        }
+        
+        .admin-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        
+        /* NEW: Price display styles */
+        .price-display {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #2ecc71;
+            margin-top: 10px;
+            text-align: center;
+            animation: fadeIn 0.5s ease;
+        }
+        
+        .price-breakdown {
+            font-size: 1rem;
+            color: #555;
+            margin-top: 5px;
+            text-align: center;
+        }
+        
+        .total-price {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #2ecc71;
+            margin: 20px 0;
+            text-align: center;
+            padding: 10px;
+            border-radius: 10px;
+            background: rgba(46, 204, 113, 0.1);
+            animation: pulse 2s infinite;
+        }
+        
+        /* NEW: Reset button styles */
+        .reset-button {
+            position: absolute;
+            top: 100px;
+            left: 20px;
+            background: linear-gradient(to right, #e74c3c, #c0392b);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            padding: 12px 25px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(231, 76, 60, 0.4);
+            z-index: 1000;
+            display: none;
+        }
+        
+        .reset-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(231, 76, 60, 0.6);
+        }
+        
+        /* NEW: Virtual Keyboard Styles */
+        .virtual-keyboard {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: #f8f9fa;
+            border-top: 2px solid #dee2e6;
+            padding: 10px;
+            z-index: 3000;
+            display: none;
+            flex-direction: column;
+            gap: 5px;
+        }
+        
+        .keyboard-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #dee2e6;
+        }
+        
+        .keyboard-title {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #495057;
+        }
+        
+        .keyboard-close {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #6c757d;
+            transition: color 0.3s;
+            padding: 5px 10px;
+            border-radius: 5px;
+        }
+        
+        .keyboard-close:hover {
+            color: #dc3545;
+            background-color: #f8f9fa;
+        }
+        
+        .keyboard-row {
+            display: flex;
+            justify-content: center;
+            gap: 5px;
+        }
+        
+        .keyboard-key {
+            background: white;
+            border: 1px solid #ced4da;
+            border-radius: 5px;
+            padding: 12px 15px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            min-width: 50px;
+            text-align: center;
+            user-select: none;
+        }
+        
+        .keyboard-key:hover {
+            background: #e9ecef;
+        }
+        
+        .keyboard-key:active {
+            background: #dee2e6;
+            transform: scale(0.95);
+        }
+        
+        .keyboard-key.wide {
+            min-width: 100px;
+        }
+        
+        .keyboard-key.space {
+            min-width: 300px;
+        }
+        
+        .keyboard-key.shift {
+            background: #6c757d;
+            color: white;
+        }
+        
+        .keyboard-key.enter {
+            background: #28a745;
+            color: white;
+        }
+        
+        .keyboard-key.backspace {
+            background: #dc3545;
+            color: white;
+        }
+        
+        .keyboard-active-input {
+            border-color: #007bff !important;
+            box-shadow: 0 0 0 2px rgba(0,123,255,.25) !important;
+        }
+        
+        /* NEW: Custom Background Description Box */
+        .custom-bg-description {
+            width: 100%;
+            max-width: 500px;
+            margin: 20px 0;
+        }
+        
+        .description-box {
+            width: 100%;
+            height: 120px;
+            padding: 15px;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            resize: none;
+            transition: border-color 0.3s;
+        }
+        
+        .description-box:focus {
+            border-color: #ff6b6b;
+            outline: none;
+        }
+        
+        /* NEW: PIN Input Styles */
+        .pin-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 2500;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .pin-modal.active {
+            display: flex;
+        }
+        
+        .pin-content {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            width: 90%;
+            max-width: 400px;
+            text-align: center;
+        }
+        
+        .pin-display {
+            font-size: 2rem;
+            letter-spacing: 10px;
+            margin: 20px 0;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            min-height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .pin-keypad {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin: 20px 0;
+        }
+        
+        .pin-key {
+            background: #6c757d;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            padding: 20px;
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .pin-key:hover {
+            background: #5a6268;
+        }
+        
+        .pin-key:active {
+            transform: scale(0.95);
+        }
+        
+        .pin-clear {
+            background: #dc3545;
+        }
+        
+        .pin-enter {
+            background: #28a745;
+        }
+        
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .kiosk-container {
+                height: 100vh;
+                border-radius: 0;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .btn {
+                width: 90%;
+            }
+            
+            .receipt-two-part {
+                flex-direction: column;
+            }
+            
+            .category-tabs {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .order-number {
+                font-size: 3rem;
+            }
+            
+            .confirmation-message {
+                font-size: 1.2rem;
+            }
+            
+            .magic-text {
+                font-size: 1.5rem;
+            }
+            
+            .admin-corner {
+                width: 60px;
+                height: 60px;
+            }
+            
+            .price-display {
+                font-size: 1.2rem;
+            }
+            
+            .total-price {
+                font-size: 1.5rem;
+            }
+            
+            .reset-button {
+                top: 10px;
+                left: 10px;
+                padding: 10px 20px;
+                font-size: 1rem;
+            }
+            
+            .virtual-keyboard {
+                padding: 5px;
+            }
+            
+            .keyboard-key {
+                padding: 10px 12px;
+                font-size: 1rem;
+                min-width: 40px;
+            }
+            
+            .keyboard-key.space {
+                min-width: 200px;
+            }
+            
+            .pin-key {
+                padding: 15px;
+                font-size: 1.2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="kiosk-container">
+        <!-- NEW: Permanent Reset Button -->
+        <button class="reset-button" onclick="startOver()">⟳ RESET</button>
+        
+        <!-- Hidden Admin Corner -->
+        <div class="admin-corner" id="admin-corner"></div>
+        
+        <!-- NEW: PIN Modal -->
+        <div class="pin-modal" id="pin-modal">
+            <div class="pin-content">
+                <h2>Enter Admin PIN</h2>
+                <div class="pin-display" id="pin-display">****</div>
+                <div class="pin-keypad">
+                    <button class="pin-key" data-key="1">1</button>
+                    <button class="pin-key" data-key="2">2</button>
+                    <button class="pin-key" data-key="3">3</button>
+                    <button class="pin-key" data-key="4">4</button>
+                    <button class="pin-key" data-key="5">5</button>
+                    <button class="pin-key" data-key="6">6</button>
+                    <button class="pin-key" data-key="7">7</button>
+                    <button class="pin-key" data-key="8">8</button>
+                    <button class="pin-key" data-key="9">9</button>
+                    <button class="pin-key pin-clear" id="pin-clear">C</button>
+                    <button class="pin-key" data-key="0">0</button>
+                    <button class="pin-key pin-enter" id="pin-enter">✓</button>
+                </div>
+                <button class="btn btn-secondary" onclick="hidePinModal()">Cancel</button>
+            </div>
+        </div>
+        
+        <!-- Admin Modal -->
+        <div class="admin-modal" id="admin-modal">
+            <div class="admin-content">
+                <div class="admin-header">
+                    <h2 class="admin-title">Admin Settings</h2>
+                    <button class="close-admin" id="close-admin">&times;</button>
+                </div>
+                
+                <div class="admin-section">
+                    <h3>Event Details</h3>
+                    <div class="admin-input-group">
+                        <label class="admin-label">Event Name</label>
+                        <input type="text" class="admin-input" id="admin-event-name" value="Downtown Get Down">
+                    </div>
+                    <div class="admin-input-group">
+                        <label class="admin-label">Customer Support Email</label>
+                        <input type="email" class="admin-input" id="admin-support-email" value="support@photofun.com">
+                    </div>
+                    <div class="admin-input-group">
+                        <label class="admin-label">Customer Support Phone</label>
+                        <input type="text" class="admin-input" id="admin-support-phone" value="(555) 123-4567">
+                    </div>
+                </div>
+                
+                <div class="admin-section">
+                    <h3>Pricing</h3>
+                    <div class="admin-input-group">
+                        <label class="admin-label">Price per Print ($)</label>
+                        <input type="number" class="admin-input" id="admin-price-print" value="10.00" step="0.01" min="0">
+                    </div>
+                    <div class="admin-input-group">
+                        <label class="admin-label">Price per Email ($)</label>
+                        <input type="number" class="admin-input" id="admin-price-email" value="1.00" step="0.01" min="0">
+                    </div>
+                </div>
+                
+                <div class="admin-section">
+                    <h3>Limits</h3>
+                    <div class="admin-input-group">
+                        <label class="admin-label">Max Prints per Order</label>
+                        <input type="number" class="admin-input" id="admin-max-prints" value="10" min="1">
+                    </div>
+                    <div class="admin-input-group">
+                        <label class="admin-label">Max Emails per Order</label>
+                        <input type="number" class="admin-input" id="admin-max-emails" value="5" min="1">
+                    </div>
+                </div>
+                
+                <div class="admin-section">
+                    <h3>Receipt Settings</h3>
+                    <div class="admin-input-group">
+                        <label class="admin-label">Starting Receipt Number</label>
+                        <input type="number" class="admin-input" id="admin-start-receipt" value="621" min="1">
+                    </div>
+                </div>
+                
+                <div class="admin-buttons">
+                    <button class="btn btn-secondary" id="cancel-admin">Cancel</button>
+                    <button class="btn btn-admin" id="save-admin">Save Settings</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- NEW: Virtual Keyboard -->
+        <div class="virtual-keyboard" id="virtual-keyboard">
+            <div class="keyboard-header">
+                <div class="keyboard-title">Virtual Keyboard</div>
+                <button class="keyboard-close" id="keyboard-close">&times;</button>
+            </div>
+            <div class="keyboard-row">
+                <div class="keyboard-key" data-key="1">1</div>
+                <div class="keyboard-key" data-key="2">2</div>
+                <div class="keyboard-key" data-key="3">3</div>
+                <div class="keyboard-key" data-key="4">4</div>
+                <div class="keyboard-key" data-key="5">5</div>
+                <div class="keyboard-key" data-key="6">6</div>
+                <div class="keyboard-key" data-key="7">7</div>
+                <div class="keyboard-key" data-key="8">8</div>
+                <div class="keyboard-key" data-key="9">9</div>
+                <div class="keyboard-key" data-key="0">0</div>
+                <div class="keyboard-key backspace" data-key="backspace">⌫</div>
+            </div>
+            <div class="keyboard-row">
+                <div class="keyboard-key" data-key="q">q</div>
+                <div class="keyboard-key" data-key="w">w</div>
+                <div class="keyboard-key" data-key="e">e</div>
+                <div class="keyboard-key" data-key="r">r</div>
+                <div class="keyboard-key" data-key="t">t</div>
+                <div class="keyboard-key" data-key="y">y</div>
+                <div class="keyboard-key" data-key="u">u</div>
+                <div class="keyboard-key" data-key="i">i</div>
+                <div class="keyboard-key" data-key="o">o</div>
+                <div class="keyboard-key" data-key="p">p</div>
+            </div>
+            <div class="keyboard-row">
+                <div class="keyboard-key" data-key="a">a</div>
+                <div class="keyboard-key" data-key="s">s</div>
+                <div class="keyboard-key" data-key="d">d</div>
+                <div class="keyboard-key" data-key="f">f</div>
+                <div class="keyboard-key" data-key="g">g</div>
+                <div class="keyboard-key" data-key="h">h</div>
+                <div class="keyboard-key" data-key="j">j</div>
+                <div class="keyboard-key" data-key="k">k</div>
+                <div class="keyboard-key" data-key="l">l</div>
+                <div class="keyboard-key enter" data-key="enter">↵</div>
+            </div>
+            <div class="keyboard-row">
+                <div class="keyboard-key shift" data-key="shift">⇧</div>
+                <div class="keyboard-key" data-key="z">z</div>
+                <div class="keyboard-key" data-key="x">x</div>
+                <div class="keyboard-key" data-key="c">c</div>
+                <div class="keyboard-key" data-key="v">v</div>
+                <div class="keyboard-key" data-key="b">b</div>
+                <div class="keyboard-key" data-key="n">n</div>
+                <div class="keyboard-key" data-key="m">m</div>
+                <div class="keyboard-key" data-key=",">,</div>
+                <div class="keyboard-key" data-key=".">.</div>
+                <div class="keyboard-key" data-key="@">@</div>
+            </div>
+            <div class="keyboard-row">
+                <div class="keyboard-key space" data-key=" ">Space</div>
+            </div>
+        </div>
+
+        <!-- Welcome Screen -->
+        <div class="screen active" id="welcome-screen">
+            <div class="header">
+                <h1>Photo Fun Booth</h1>
+                <p>Create amazing photos with custom backgrounds!</p>
+            </div>
+            <div class="content">
+                <div class="preview-container">
+                    <div class="preview-image" style="background-image: url('https://www.propandpose.co.uk/wp-content/uploads/2025/03/greenscreen-1024x683.jpg');"></div>
+                </div>
+                <button class="btn btn-large" onclick="showScreen('background-screen')">Get Started</button>
+            </div>
+        </div>
+
+        <!-- Background Selection Screen -->
+        <div class="screen" id="background-screen">
+            <div class="header">
+                <h1>Choose Your Background</h1>
+                <p>Select from our amazing backgrounds in different categories!</p>
+            </div>
+            <div class="content">
+                <!-- Category Tabs -->
+                <div class="category-tabs">
+                    <div class="category-tab active" data-category="background">Nature</div>
+                    <div class="category-tab" data-category="famous">Landmarks</div>
+                    <div class="category-tab" data-category="football">Sports</div>
+                    <div class="category-tab" data-category="movies">Movies & Games</div>
+                    <div class="category-tab" data-category="others">Others</div>
+                </div>
+                
+                <!-- Nature Categories -->
+                <div class="background-category active" id="background-category">
+                    <div class="backgrounds">
+                        <div class="background" onclick="selectBackground(this, 'background', 'Beach Sunset', 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80')">
+                            <div class="bg-preview" style="background-image: url('https://images.unsplash.com/photo-1507525428034-b723cf961d3e?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80');"></div>
+                        </div>
+                        <div class="background" onclick="selectBackground(this, 'background', 'Mountain View', 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80')">
+                            <div class="bg-preview" style="background-image: url('https://images.unsplash.com/photo-1506905925346-21bda4d32df4?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80');"></div>
+                        </div>
+                        <div class="background" onclick="selectBackground(this, 'background', 'Forest Path', 'https://images.unsplash.com/photo-1448375240586-882707db888b?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80')">
+                            <div class="bg-preview" style="background-image: url('https://images.unsplash.com/photo-1448375240586-882707db888b?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80');"></div>
+                        </div>
+                        <div class="background" onclick="selectBackground(this, 'background', 'Mossy Tree', 'https://encrypted-tbn1.gstatic.com/images?q=tbn:ANd9GcQBBhx6-1bHI9nfO7iTlMkki_JffI3-Cl4kXs2Cetic9U54jwLGBD1QrrzNiLRBUAzFo1NPiGnMF3VVsr5SQeThDN-Ty6l6q-FMVbufOQ')">
+                            <div class="bg-preview" style="background-image: url('https://encrypted-tbn1.gstatic.com/images?q=tbn:ANd9GcQBBhx6-1bHI9nfO7iTlMkki_JffI3-Cl4kXs2Cetic9U54jwLGBD1QrrzNiLRBUAzFo1NPiGnMF3VVsr5SQeThDN-Ty6l6q-FMVbufOQ');"></div>
+                        </div>
+                        <div class="background" onclick="selectBackground(this, 'background', 'The Alps', 'https://img.tastelife.tv/assets/uploads/2021/12/Indonesia_4K_Nature_scenery_Relaxation_Film_10x7-684x480.jpg')">
+                            <div class="bg-preview" style="background-image: url('https://img.tastelife.tv/assets/uploads/2021/12/Indonesia_4K_Nature_scenery_Relaxation_Film_10x7-684x480.jpg');"></div>
+                        </div>
+                        <div class="background" onclick="selectBackground(this, 'background', 'Funky Trees', 'https://deih43ym53wif.cloudfront.net/socotra-island-yemen-shutterstock_621058145_e853fb7041.jpeg')">
+                            <div class="bg-preview" style="background-image: url('https://deih43ym53wif.cloudfront.net/socotra-island-yemen-shutterstock_621058145_e853fb7041.jpeg');"></div>
+                        </div>
+                        <div class="background" onclick="selectBackground(this, 'background', 'Twilight Moment', 'https://i0.wp.com/digital-photography-school.com/wp-content/uploads/2018/10/bluebells%2C_oxfordshire.jpg?fit=1500%2C1000&ssl=1')">
+                            <div class="bg-preview" style="background-image: url('https://i0.wp.com/digital-photography-school.com/wp-content/uploads/2018/10/bluebells%2C_oxfordshire.jpg?fit=1500%2C1000&ssl=1');"></div>
+                        </div>
+                        <div class="background" onclick="selectBackground(this, 'background', 'Super Cute Bear', 'https://i.insider.com/652038836561dd877e7333e1?width=800&format=jpeg&auto=webp')">
+                            <div class="bg-preview" style="background-image: url('https://i.insider.com/652038836561dd877e7333e1?width=800&format=jpeg&auto=webp');"></div>
+                        </div>    
+                    </div>
+                </div>
+
+                <div class="background-preview-overlay" id="bg-preview-overlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.8); justify-content:center; align-items:center; z-index:9999;">
+                    <span id="close-preview" style="position:absolute; top:20px; right:30px; font-size:40px; color:white; cursor:pointer; font-weight:bold;">&times;</span>
+                    <img id="bg-preview-image" src="" style="width:40%; height:60%; border:2px solid white; box-shadow:0 0 20px black;">
+                </div>
+
+<!--Start of landmarks-->  
+                <div class="background-category" id="famous-category">
+                    <div class="backgrounds">
+                        <div class="background" onclick="selectBackground(this, 'famous', 'Eiffel Tower', 'https://images.unsplash.com/photo-1549144511-f099e773c147?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80')">
+                            <div class="bg-preview" style="background-image: url('https://images.unsplash.com/photo-1549144511-f099e773c147?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80');"></div>
+                        </div>
+                        <div class="background" onclick="selectBackground(this, 'famous', 'Machu Picchu', 'https://www.usnews.com/object/image/00000169-5e06-df95-a57d-7ec6b8380000/machu-picchu-stock.jpg?update-time=1706802704566&size=responsive970')">
+                            <div class="bg-preview" style="background-image: url('https://www.usnews.com/object/image/00000169-5e06-df95-a57d-7ec6b8380000/machu-picchu-stock.jpg?update-time=1706802704566&size=responsive970');"></div>
+                        </div>
+                        <div class="background" onclick="selectBackground(this, 'famous', 'Taj Mahal', 'https://images.unsplash.com/photo-1548013146-72479768bada?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80')">
+                            <div class="bg-preview" style="background-image: url('https://images.unsplash.com/photo-1548013146-72479768bada?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80');"></div>
+                        </div>
+                        <div class="background" onclick="selectBackground(this, 'famous', 'Mount Rushmore', 'https://hips.hearstapps.com/elledecor/assets/16/25/american-landmarks-mount-rushmore_1.jpg')">
+                            <div class="bg-preview" style="background-image: url('https://hips.hearstapps.com/elledecor/assets/16/25/american-landmarks-mount-rushmore_1.jpg');"></div>
+                        </div>
+                   <!--new row-->
+                           <div class="backgrounds">
+                        <div class="background selected" onclick="selectBackground(this, 'background', 'Angkor Wat', 'https://www.usnews.com/object/image/00000169-5e07-df95-a57d-7ec72aae0000/2-angkor-wat-getty.jpg?update-time=1706734181489&size=responsive970')">
+                            <div class="bg-preview" style="background-image: url('https://www.usnews.com/object/image/00000169-5e07-df95-a57d-7ec72aae0000/2-angkor-wat-getty.jpg?update-time=1706734181489&size=responsive970');"></div>
+                        </div>
+                      </div>
+                        <div class="background" onclick="selectBackground(this, 'famous', 'Eater Island', 'https://www.usnews.com/object/image/00000169-5e06-df95-a57d-7ec6d4680000/13-easter-island-getty.jpg?update-time=1706734737109&size=responsive970')">
+                            <div class="bg-preview" style="background-image: url('https://www.usnews.com/object/image/00000169-5e06-df95-a57d-7ec6d4680000/13-easter-island-getty.jpg?update-time=1706734737109&size=responsive970');"></div>
+                        </div>
+                        <div class="background" onclick="selectBackground(this, 'famous', 'Neuchwanstein Castle', 'https://www.usnews.com/object/image/00000169-5e06-df95-a57d-7ec6d9e70000/15-german-castle-getty.jpg?update-time=1706734850886&size=responsive970')">
+                            <div class="bg-preview" style="background-image: url('https://www.usnews.com/object/image/00000169-5e06-df95-a57d-7ec6d9e70000/15-german-castle-getty.jpg?update-time=1706734850886&size=responsive970');"></div>
+                        </div>
+                        <div class="background" onclick="selectBackground(this, 'famous', 'Victoria Falls', 'https://www.usnews.com/object/image/00000169-5e06-df95-a57d-7ec6eaaf0000/18-victoria-falls-getty.jpg?update-time=1706735420134&size=responsive970')">
+                            <div class="bg-preview" style="background-image: url('https://www.usnews.com/object/image/00000169-5e06-df95-a57d-7ec6eaaf0000/18-victoria-falls-getty.jpg?update-time=1706735420134&size=responsive970');"></div>
+                        </div>  
+                <!--End of new row-->            
+                    </div>
+                </div>
+<!--End of Landmarks-->          
+<!--Start of Sports-->             
+                <div class="background-category" id="football-category">
+                    <div class="backgrounds">
+                        <div class="background" onclick="selectBackground(this, 'football', 'Victory', 'https://i.guim.co.uk/img/media/d17970383ec1ef5a8c174d01a7191276f85d4650/0_0_3531_2338/master/3531.jpg?width=700&quality=85&auto=format&fit=max&s=6a0bb802e3c516b420c9fda1c3250240')">
+                            <div class="bg-preview" style="background-image: url('https://i.guim.co.uk/img/media/d17970383ec1ef5a8c174d01a7191276f85d4650/0_0_3531_2338/master/3531.jpg?width=700&quality=85&auto=format&fit=max&s=6a0bb802e3c516b420c9fda1c3250240');"></div>
+                        </div>
+                        <div class="background" onclick="selectBackground(this, 'football', 'Ussain Bolt', 'https://a.espncdn.com/photo/2019/1219/r643661_1296x729_16-9.jpg')">
+                            <div class="bg-preview" style="background-image: url('https://a.espncdn.com/photo/2019/1219/r643661_1296x729_16-9.jpg');"></div>
+                        </div>
+                        <div class="background" onclick="selectBackground(this, 'football', 'Muhammad Ali', 'https://i.guim.co.uk/img/media/53400f3d3fbe6298ad9f8c483b85b97636e20522/0_538_3252_2675/master/3252.jpg?width=480&dpr=1&s=none&crop=none')">
+                            <div class="bg-preview" style="background-image: url('https://i.guim.co.uk/img/media/53400f3d3fbe6298ad9f8c483b85b97636e20522/0_538_3252_2675/master/3252.jpg?width=480&dpr=1&s=none&crop=none');"></div>
+                        </div>
+                        <div class="background" onclick="selectBackground(this, 'football', 'Football Celebration', 'https://images.unsplash.com/photo-1577223625816-7546f13df25d?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80')">
+                            <div class="bg-preview" style="background-image: url('https://images.unsplash.com/photo-1577223625816-7546f13df25d?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80');"></div>
+                        </div>
+                  </div>
+                 <!--Start of second row-->     
+                           <div class="backgrounds">
+                        <div class="background" onclick="selectBackground(this, 'football', 'SIIUUU', 'https://cdn.mos.cms.futurecdn.net/v2/t:0,l:105,cw:600,ch:450,q:80,w:600/oVGCJx9HWZAUi4ojciHEA.jpg')">
+                            <div class="bg-preview" style="background-image: url('https://cdn.mos.cms.futurecdn.net/v2/t:0,l:105,cw:600,ch:450,q:80,w:600/oVGCJx9HWZAUi4ojciHEA.jpg');"></div>
+                        </div>
+                        <div class="background" onclick="selectBackground(this, 'football', 'Bob Sledding', 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTZSYtOQytAXlXACWvEagso0XItOvQ2jhI4Eg&s')">
+                            <div class="bg-preview" style="background-image: url('https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTZSYtOQytAXlXACWvEagso0XItOvQ2jhI4Eg&s');"></div>
+                        </div>
+                        <div class="background" onclick="selectBackground(this, 'football', 'Max Verstappen', 'https://img.jakpost.net/c/2022/05/09/2022_05_09_125440_1652083789._large.jpg')">
+                            <div class="bg-preview" style="background-image: url('https://img.jakpost.net/c/2022/05/09/2022_05_09_125440_1652083789._large.jpg');"></div>
+                        </div>
+                        <div class="background" onclick="selectBackground(this, 'football', 'Secretariat', 'https://cdn.britannica.com/07/260707-050-BB5D5744/Secretariat-racehorse-Ron-Turcotte-winners-circle-roses-Kentucky-Derby-1973.jpg')">
+                            <div class="bg-preview" style="background-image: url('https://cdn.britannica.com/07/260707-050-BB5D5744/Secretariat-racehorse-Ron-Turcotte-winners-circle-roses-Kentucky-Derby-1973.jpg');"></div>
+                        </div>        
+                    </div>
+                </div>
+<!--End of sports-->
+              
+                
+                <div class="background-category" id="movies-category">
+                    <div class="backgrounds">
+                        <div class="background selected" onclick="selectBackground(this, 'movies', 'Planet 51', 'https://d32qys9a6wm9no.cloudfront.net/images/movies/backdrop/db/78ee2191d6ce23948ac422729aa58a23_1280x720.jpg?t=1651238040')">
+                            <div class="bg-preview" style="background-image: url('https://d32qys9a6wm9no.cloudfront.net/images/movies/backdrop/db/78ee2191d6ce23948ac422729aa58a23_1280x720.jpg?t=1651238040');"></div>
+                        </div>
+                        <div class="background" onclick="selectBackground(this, 'movies', 'Cars', 'https://i0.wp.com/automotivehistory.org/wp-content/uploads/2023/06/cars-dvd-Stn7.jpeg?resize=1536%2C881&ssl=1')">
+                            <div class="bg-preview" style="background-image: url('https://i0.wp.com/automotivehistory.org/wp-content/uploads/2023/06/cars-dvd-Stn7.jpeg?resize=1536%2C881&ssl=1');"></div>
+                        </div>
+                        <div class="background" onclick="selectBackground(this, 'movies', 'Friday 13', 'https://medias.spotern.com/spots/w640/161/161822-1536225044.webp')">
+                            <div class="bg-preview" style="background-image: url('https://medias.spotern.com/spots/w640/161/161822-1536225044.webp');"></div>
+                        </div>
+                        <div class="background" onclick="selectBackground(this, 'movies', 'Alien', 'https://media.cnn.com/api/v1/images/stellar/prod/23-adobe-express-file.jpg?c=original&q=w_860,c_fill/f_avif')">
+                            <div class="bg-preview" style="background-image: url('https://media.cnn.com/api/v1/images/stellar/prod/23-adobe-express-file.jpg?c=original&q=w_860,c_fill/f_avif');"></div>
+                        </div>
+                        <div class="background" onclick="selectBackground(this, 'movies', 'minecraft', 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/af/Minecraft_key-art_%22useless%22_version.png/250px-Minecraft_key-art_%22useless%22_version.png')">
+                            <div class="bg-preview" style="background-image: url('https://upload.wikimedia.org/wikipedia/commons/thumb/a/af/Minecraft_key-art_%22useless%22_version.png/250px-Minecraft_key-art_%22useless%22_version.png');"></div>
+                        </div>
+                        <div class="background" onclick="selectBackground(this, 'movies', 'mario kart', 'https://kotaku.com/app/uploads/2025/07/f987a4c9da6a8fd5b5092ded6648e10b-960x540.jpg')">
+                            <div class="bg-preview" style="background-image: url('https://kotaku.com/app/uploads/2025/07/f987a4c9da6a8fd5b5092ded6648e10b-960x540.jpg');"></div>
+                        </div>
+                        <div class="background" onclick="selectBackground(this, 'movies', 'resident evil', 'https://log-wp-media.s3.amazonaws.com/wp-content/uploads/2015/12/Resident-Evil-Village_20210508101051-scaled-1024x576.jpg')">
+                            <div class="bg-preview" style="background-image: url('https://log-wp-media.s3.amazonaws.com/wp-content/uploads/2015/12/Resident-Evil-Village_20210508101051-scaled-1024x576.jpg');"></div>
+                        </div>
+                        <div class="background" onclick="selectBackground(this, 'movies', 'dbd', 'https://static0.gamerantimages.com/wordpress/wp-content/uploads/2023/02/deebeedee.jpg?q=50&fit=crop&w=825&dpr=1.5')">
+                            <div class="bg-preview" style="background-image: url('https://static0.gamerantimages.com/wordpress/wp-content/uploads/2023/02/deebeedee.jpg?q=50&fit=crop&w=825&dpr=1.5');"></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="background-category" id="others-category">
+                    <div class="backgrounds">
+                        <div class="background selected" onclick="selectBackground(this, 'others', 'custom', 'https://i.ebayimg.com/images/g/t2EAAOSwjKJbdu6v/s-l1600.webp')">
+                            <div class="bg-preview" style="background-image: url('https://i.ebayimg.com/images/g/t2EAAOSwjKJbdu6v/s-l1600.webp');"></div>
+                        </div>
+                        <div class="background" onclick="selectBackground(this, 'others', 'Colorful Pattern', 'https://images.unsplash.com/photo-1550684376-efcbd6e3f031?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80')">
+                            <div class="bg-preview" style="background-image: url('https://images.unsplash.com/photo-1550684376-efcbd6e3f031?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80');"></div>
+                        </div>
+                        <div class="background" onclick="selectBackground(this, 'others', 'bubbles', 'https://i.servimg.com/u/f46/15/36/71/19/bubble11.jpg')">
+                            <div class="bg-preview" style="background-image: url('https://i.servimg.com/u/f46/15/36/71/19/bubble11.jpg');"></div>
+                        </div>
+                        <div class="background" onclick="selectBackground(this, 'others', 'gradient', 'https://images.unsplash.com/photo-1579546929662-711aa81148cf?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80')">
+                            <div class="bg-preview" style="background-image: url('https://images.unsplash.com/photo-1579546929662-711aa81148cf?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80');"></div>
+                        </div>
+                        <div class="background" onclick="selectBackground(this, 'others', 'pipes', 'https://preview.redd.it/ws935ycrrs611.jpg?width=1080&crop=smart&auto=webp&s=967dd2b6f77a37586d0c28460498abe36c760f11')">
+                            <div class="bg-preview" style="background-image: url('https://preview.redd.it/ws935ycrrs611.jpg?width=1080&crop=smart&auto=webp&s=967dd2b6f77a37586d0c28460498abe36c760f11');"></div>
+                        </div>
+                        <div class="background" onclick="selectBackground(this, 'others', 'glitch', 'https://cdn.textures4photoshop.com/tex/thumbs/tv-screen-error-glitch-background-thumb33.jpg')">
+                            <div class="bg-preview" style="background-image: url('https://cdn.textures4photoshop.com/tex/thumbs/tv-screen-error-glitch-background-thumb33.jpg');"></div>
+                        </div>
+                        <div class="background" onclick="selectBackground(this, 'others', 'greenscreen', 'https://www.vegascreativesoftware.com/fileadmin/user_upload/seo/keyword/guide_to_chroma_key_and_green_screen/i_722886/vegas-pro-guide-to-chroma-key-header-int.jpg')">
+                            <div class="bg-preview" style="background-image: url('https://www.vegascreativesoftware.com/fileadmin/user_upload/seo/keyword/guide_to_chroma_key_and_green_screen/i_722886/vegas-pro-guide-to-chroma-key-header-int.jpg');"></div>
+                        </div>
+                        <div class="background" onclick="selectBackground(this, 'others', 'chipmunk', 'https://preview.redd.it/where-did-this-squirrel-meme-come-from-v0-sqez7yp14m9f1.png?auto=webp&s=82298f2f29c590cf1e06dbfafb4fd7ca0ef48370')">
+                            <div class="bg-preview" style="background-image: url('https://preview.redd.it/where-did-this-squirrel-meme-come-from-v0-sqez7yp14m9f1.png?auto=webp&s=82298f2f29c590cf1e06dbfafb4fd7ca0ef48370');"></div>
+                        </div>
+                    </div>
+                </div>
+        
+
+                <!-- NEW: Custom Background Description Box -->
+                <div class="custom-bg-description">
+                    <h3>Want a Custom Background?</h3>
+                    <p>Describe what you'd like and our photographer will create it for you!</p>
+                    <textarea class="description-box" id="custom-bg-description" placeholder="Describe your custom background idea here... (e.g., 'I want to be on Mars with aliens', 'Make me look like a superhero', etc.)"></textarea>
+                </div>
+                
+                <div class="nav-buttons">
+                    <button class="btn btn-secondary" onclick="showScreen('welcome-screen')">Back</button>
+                    <button class="btn" onclick="showScreen('details-screen')">Continue</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Party Details Screen -->
+        <div class="screen" id="details-screen">
+            <div class="header">
+                <h1>Party Details</h1>
+                <p>Tell us about your group</p>
+            </div>
+            <div class="content">
+                <div class="input-group">
+                    <label class="input-label">Party Name</label>
+                    <input type="text" class="text-input keyboard-input" id="party-name" placeholder="Enter your party name" data-maxlength="30">
+                </div>
+                
+                <div class="input-group">
+                    <label class="input-label">Number of People</label>
+                    <div class="counter">
+                        <button class="counter-btn" onclick="changePeopleCount(-1)">-</button>
+                        <div class="counter-value" id="people-count">1</div>
+                        <button class="counter-btn" onclick="changePeopleCount(1)">+</button>
+                    </div>
+                </div>
+                
+                <div class="nav-buttons">
+                    <button class="btn btn-secondary" onclick="showScreen('background-screen')">Back</button>
+                    <button class="btn" onclick="showScreen('delivery-screen')">Continue</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Delivery Options Screen -->
+        <div class="screen" id="delivery-screen">
+            <div class="header">
+                <h1>How Would You Like Your Photos?</h1>
+                <p>Choose your delivery options</p>
+            </div>
+            <div class="content">
+                <div class="options">
+                    <div class="option selected" onclick="selectOption(this)">
+                        <div class="option-icon">🖨️</div>
+                        <div>Prints Only</div>
+                    </div>
+                    <div class="option" onclick="selectOption(this)">
+                        <div class="option-icon">📧</div>
+                        <div>Email Only</div>
+                    </div>
+                    <div class="option" onclick="selectOption(this)">
+                        <div class="option-icon">📦</div>
+                        <div>Both</div>
+                    </div>
+                </div>
+                
+                <div class="input-group" id="prints-section">
+                    <label class="input-label">Number of Prints</label>
+                    <div class="counter">
+                        <button class="counter-btn" onclick="changePrintCount(-1)">-</button>
+                        <div class="counter-value" id="print-count">1</div>
+                        <button class="counter-btn" onclick="changePrintCount(1)">+</button>
+                    </div>
+                    <div class="price-display" id="prints-price">$10.00</div>
+                </div>
+                
+                <div class="input-group" id="emails-section">
+                    <label class="input-label">Number of Email Addresses</label>
+                    <div class="counter">
+                        <button class="counter-btn" onclick="changeEmailCount(-1)">-</button>
+                        <div class="counter-value" id="email-count">1</div>
+                        <button class="counter-btn" onclick="changeEmailCount(1)">+</button>
+                    </div>
+                    <div class="price-display" id="emails-price">$1.00</div>
+                </div>
+                
+                <!-- Total Price Display -->
+                <div class="total-price" id="total-price-display">
+                    Total: $10.00
+                </div>
+                
+                <div class="nav-buttons">
+                    <button class="btn btn-secondary" onclick="showScreen('details-screen')">Back</button>
+                    <button class="btn" onclick="showEmailScreen()">Continue</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Email Entry Screen -->
+        <div class="screen" id="email-screen">
+            <div class="header">
+                <h1>Email Addresses</h1>
+                <p>Where should we send your digital photos?</p>
+            </div>
+            <div class="content">
+                <div class="email-inputs" id="email-inputs-container">
+                    <!-- Email inputs will be generated here -->
+                </div>
+                
+                <div class="nav-buttons">
+                    <button class="btn btn-secondary" onclick="showScreen('delivery-screen')">Back</button>
+                    <button class="btn" onclick="validateEmails()">Continue</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Payment Screen -->
+        <div class="screen" id="payment-screen">
+            <div class="header">
+                <h1>Payment Method</h1>
+                <p>How would you like to pay?</p>
+            </div>
+            <div class="content">
+                <div class="options">
+                    <div class="option selected" onclick="selectPayment(this, 'cash')">
+                        <div class="option-icon">💵</div>
+                        <div>Cash</div>
+                    </div>
+                    <div class="option" onclick="selectPayment(this, 'card')">
+                        <div class="option-icon">💳</div>
+                        <div>Card</div>
+                    </div>
+                    <div class="option" onclick="selectPayment(this, 'check')">
+                        <div class="option-icon">📝</div>
+                        <div>Check</div>
+                    </div>
+                </div>
+                
+                <!-- Total Price Display on Payment Screen -->
+                <div class="total-price" id="payment-total-price">
+                    Total: $10.00
+                </div>
+                
+                <div class="nav-buttons">
+                    <button class="btn btn-secondary" onclick="showScreen('delivery-screen')">Back</button>
+                    <button class="btn" onclick="showScreen('summary-screen')">Continue</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Summary Screen -->
+        <div class="screen" id="summary-screen">
+            <div class="header">
+                <h1>Almost Done!</h1>
+                <p>Review your choices before confirming your order</p>
+            </div>
+            <div class="content">
+                <div class="receipt">
+                    <h3>Order Summary</h3>
+                    <div class="receipt-line">
+                        <span>Party Name:</span>
+                        <span id="summary-name">-</span>
+                    </div>
+                    <div class="receipt-line">
+                        <span>People:</span>
+                        <span id="summary-people">1</span>
+                    </div>
+                    <div class="receipt-line">
+                        <span>Background:</span>
+                        <span id="summary-background">Beach Sunset</span>
+                    </div>
+                    <div class="receipt-line">
+                        <span>Custom Description:</span>
+                        <span id="summary-custom-bg">-</span>
+                    </div>
+                    <div class="receipt-line">
+                        <span>Prints:</span>
+                        <span id="summary-prints">0</span>
+                    </div>
+                    <div class="receipt-line">
+                        <span>Emails:</span>
+                        <span id="summary-emails">0</span>
+                    </div>
+                    <div class="receipt-line">
+                        <span>Payment:</span>
+                        <span id="summary-payment">Cash</span>
+                    </div>
+                    <div class="receipt-line">
+                        <span>Total:</span>
+                        <span id="summary-total">$0.00</span>
+                    </div>
+                </div>
+                
+                <div class="nav-buttons">
+                    <button class="btn btn-secondary" onclick="showScreen('payment-screen')">Back</button>
+                    <button class="btn" onclick="confirmOrder()">Confirm Order</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Final Receipt Screen -->
+        <div class="screen" id="receipt-screen">
+            <div class="header">
+                <h1>Thank You!</h1>
+                <p>Your photo session is complete</p>
+            </div>
+            <div class="content">
+                <div class="receipt-two-part">
+                    <!-- Customer Receipt -->
+                    <div class="receipt-part customer">
+                        <h3 style="text-align: center; color: #4facfe;">CUSTOMER COPY</h3>
+                        <div class="receipt-line">
+                            <span>Name:</span>
+                            <span id="receipt-name">-</span>
+                        </div>
+                        <div class="receipt-line">
+                            <span>Event:</span>
+                            <span id="receipt-event">Downtown Get Down</span>
+                        </div>
+                        <div class="receipt-line">
+                            <span>Time:</span>
+                            <span id="receipt-time">-</span>
+                        </div>
+                        <div class="receipt-line">
+                            <span>Date:</span>
+                            <span id="receipt-date">-</span>
+                        </div>
+                        <div class="receipt-line">
+                            <span>Background:</span>
+                            <span id="receipt-bg-name">-</span>
+                        </div>
+                        <div class="receipt-line">
+                            <span>Custom Request:</span>
+                            <span id="receipt-custom-bg">-</span>
+                        </div>
+                        
+                        <!-- Background Preview on Receipt -->
+                        <div class="receipt-bg-preview">
+                            <img id="receipt-bg-image" src="" alt="Selected Background">
+                        </div>
+                        
+                        <div class="receipt-line">
+                            <span>Prints:</span>
+                            <span id="receipt-prints">0</span>
+                        </div>
+                        <div class="receipt-line">
+                            <span>Emails:</span>
+                            <span id="receipt-emails">0</span>
+                        </div>
+                        <div class="receipt-line">
+                            <span>Payment:</span>
+                            <span id="receipt-payment">Cash</span>
+                        </div>
+                        
+                        <div class="stamp-area">
+                            <div class="stamp">PAID STAMP</div>
+                            <div class="stamp">PICKUP STAMP</div>
+                        </div>
+                        
+                        <div class="highlight">
+                            <strong>Instructions:</strong> Bring this receipt back at the end of the night to pick up your prints.
+                        </div>
+                        
+                        <div class="instructions">
+                            <strong>Didn't receive your email?</strong> Wait 2 business days, then email us at <span id="receipt-support-email">support@photofun.com</span>
+                        </div>
+                        
+                        <div class="instructions">
+                            <strong>Questions?</strong> Call <span id="receipt-support-phone">(555) 123-4567</span> or email <span id="receipt-help-email">help@photofun.com</span>
+                        </div>
+                        
+                        <div class="receipt-line">
+                            <span>Customer #:</span>
+                            <span id="receipt-number">621</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Cameraman Receipt -->
+                    <div class="receipt-part cameraman">
+                        <h3 style="text-align: center; color: #ff6b6b;">CAMERAMAN COPY</h3>
+                        <div class="receipt-line">
+                            <span>Name:</span>
+                            <span id="cam-receipt-name">-</span>
+                        </div>
+                        <div class="receipt-line">
+                            <span>Delivery:</span>
+                            <span id="cam-receipt-delivery">-</span>
+                        </div>
+                        <div class="receipt-line">
+                            <span>Time:</span>
+                            <span id="cam-receipt-time">-</span>
+                        </div>
+                        <div class="receipt-line">
+                            <span>Date:</span>
+                            <span id="cam-receipt-date">-</span>
+                        </div>
+                        <div class="receipt-line">
+                            <span>People:</span>
+                            <span id="cam-receipt-people">1</span>
+                        </div>
+                        <div class="receipt-line">
+                            <span>Background:</span>
+                            <span id="cam-receipt-bg">-</span>
+                        </div>
+                        <div class="receipt-line">
+                            <span>Custom Request:</span>
+                            <span id="cam-receipt-custom-bg">-</span>
+                        </div>
+                        
+                        <!-- Background Preview on Cameraman Receipt -->
+                        <div class="receipt-bg-preview">
+                            <img id="cam-receipt-bg-image" src="" alt="Selected Background">
+                        </div>
+                        
+                        <div class="receipt-line">
+                            <span>Emails:</span>
+                            <span id="cam-receipt-emails">-</span>
+                        </div>
+                        <div class="receipt-line">
+                            <span># Emails:</span>
+                            <span id="cam-receipt-email-count">0</span>
+                        </div>
+                        <div class="receipt-line">
+                            <span># Prints:</span>
+                            <span id="cam-receipt-print-count">0</span>
+                        </div>
+                        
+                        <div class="receipt-line">
+                            <span>Photo #:</span>
+                            <span id="cam-receipt-photo-number" style="font-size: 1.5rem; font-weight: bold;">621</span>
+                        </div>
+                        
+                        <div class="stamp-area">
+                            <div class="stamp">PAID</div>
+                            <div class="stamp">PHOTO TAKEN</div>
+                            <div class="stamp">EMAILS SENT</div>
+                            <div class="stamp">PRINTED</div>
+                            <div class="stamp">PICKED UP</div>
+                        </div>
+                        
+                        <div class="input-group">
+                            <label class="input-label">Operator Notes:</label>
+                            <textarea class="text-input" rows="3" placeholder="Enter any notes here"></textarea>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="nav-buttons" style="flex-direction: column; gap: 10px;">
+                    <button class="btn btn-print" onclick="printReceiptAndContinue()">🖨️ Print Receipt</button>
+                    <button class="btn" onclick="startOver()">Start Over</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Order Confirmation Screen -->
+        <div class="screen" id="confirmation-screen">
+            <div class="header">
+                <h1>Thank You for Your Order!</h1>
+                <p>Your photo session is being prepared</p>
+            </div>
+            <div class="content">
+                <div class="confirmation-container">
+                    <div class="order-number" id="confirmation-order-number">621</div>
+                    
+                    <div class="confirmation-message">
+                        Thank you for your order! Your custom photo experience is ready.
+                    </div>
+                    
+                    <div class="magic-text">
+                        Please move towards your cameraman for the magic to begin!
+                    </div>
+                    
+                    <div class="instructions">
+                        <p><strong>What happens next:</strong></p>
+                        <p>1. Show your order number to the cameraman</p>
+                        <p>2. Get ready for an amazing photo session</p>
+                        <p>3. Your photos will be processed with your selected background</p>
+                    </div>
+                </div>
+                
+                <div class="nav-buttons" style="justify-content: center;">
+                    <button class="btn" onclick="startOver()">Start Over</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Application state
+        const state = {
+            background: {
+                category: 'background',
+                name: 'Beach Sunset',
+                url: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80'
+            },
+            partyName: '',
+            peopleCount: 1,
+            deliveryMethod: 'prints',
+            printCount: 1,
+            emailCount: 1,
+            paymentMethod: 'cash',
+            totalPrice: 0,
+            // New state properties
+            emailAddresses: [],
+            webcamPhoto: null,
+            receiptNumber: 621,
+            customBackgroundDescription: ''
+        };
+        
+        // Configuration
+        const config = {
+            theme: 'Downtown Get Down',
+            pricePerPrint: 10.00,
+            pricePerEmail: 1.00,
+            maxPrints: 10,
+            maxEmails: 5,
+            allowCustomBackground: true,
+            paymentMethods: ['cash', 'card', 'check'],
+            eventName: 'Downtown Get Down',
+            supportEmail: 'support@photofun.com',
+            helpEmail: 'help@photofun.com',
+            supportPhone: '(555) 123-4567',
+            adminPIN: '1234'
+        };
+        
+        // Virtual Keyboard State
+        let keyboardActive = false;
+        let currentInput = null;
+        let shiftPressed = false;
+        let pinInput = '';
+        
+        // NEW: Virtual Keyboard Functions
+        function setupVirtualKeyboard() {
+            const keyboard = document.getElementById('virtual-keyboard');
+            const keys = keyboard.querySelectorAll('.keyboard-key');
+            const keyboardClose = document.getElementById('keyboard-close');
+            
+            keys.forEach(key => {
+                key.addEventListener('click', function() {
+                    const keyValue = this.getAttribute('data-key');
+                    handleKeyPress(keyValue);
+                });
+            });
+            
+            // Add close keyboard button listener
+            keyboardClose.addEventListener('click', hideVirtualKeyboard);
+            
+            // Add keyboard input event listeners to ALL text inputs
+            document.querySelectorAll('.text-input, .email-input, .description-box').forEach(input => {
+                input.addEventListener('focus', function() {
+                    showVirtualKeyboard(this);
+                });
+                
+                input.addEventListener('blur', function() {
+                    if (this !== currentInput) {
+                        hideVirtualKeyboard();
+                    }
+                });
+            });
+        }
+        
+        function showVirtualKeyboard(inputElement) {
+            const keyboard = document.getElementById('virtual-keyboard');
+            keyboard.style.display = 'flex';
+            keyboardActive = true;
+            currentInput = inputElement;
+            
+            // Add active class to current input
+            document.querySelectorAll('.text-input, .email-input, .description-box').forEach(input => {
+                input.classList.remove('keyboard-active-input');
+            });
+            currentInput.classList.add('keyboard-active-input');
+            
+            // Adjust content padding to make room for keyboard
+            document.querySelectorAll('.content').forEach(content => {
+                content.style.paddingBottom = '200px';
+            });
+            
+            // Ensure nav buttons are always visible
+            document.querySelectorAll('.nav-buttons').forEach(nav => {
+                nav.style.zIndex = '100';
+            });
+        }
+        
+        function hideVirtualKeyboard() {
+            const keyboard = document.getElementById('virtual-keyboard');
+            keyboard.style.display = 'none';
+            keyboardActive = false;
+            currentInput = null;
+            shiftPressed = false;
+            
+            // Reset shift key appearance
+            document.querySelectorAll('.keyboard-key.shift').forEach(shiftKey => {
+                shiftKey.style.background = '#6c757d';
+            });
+            
+            // Reset content padding
+            document.querySelectorAll('.content').forEach(content => {
+                content.style.paddingBottom = '';
+            });
+            
+            // Remove active class from all inputs
+            document.querySelectorAll('.text-input, .email-input, .description-box').forEach(input => {
+                input.classList.remove('keyboard-active-input');
+            });
+        }
+        
+        function handleKeyPress(key) {
+            if (!currentInput) return;
+            
+            switch(key) {
+                case 'backspace':
+                    if (currentInput.value.length > 0) {
+                        currentInput.value = currentInput.value.slice(0, -1);
+                    }
+                    break;
+                case 'enter':
+                    if (currentInput.type === 'email' || currentInput.tagName === 'TEXTAREA') {
+                        // Move to next line or next input
+                        const inputs = Array.from(document.querySelectorAll('.text-input, .email-input, .description-box'));
+                        const currentIndex = inputs.indexOf(currentInput);
+                        if (currentIndex < inputs.length - 1) {
+                            inputs[currentIndex + 1].focus();
+                        }
+                    } else {
+                        hideVirtualKeyboard();
+                    }
+                    break;
+                case 'shift':
+                    shiftPressed = !shiftPressed;
+                    document.querySelectorAll('.keyboard-key.shift').forEach(shiftKey => {
+                        shiftKey.style.background = shiftPressed ? '#495057' : '#6c757d';
+                    });
+                    break;
+                case ' ':
+                    currentInput.value += ' ';
+                    break;
+                default:
+                    let char = key;
+                    if (shiftPressed && key.length === 1) {
+                        char = key.toUpperCase();
+                        shiftPressed = false;
+                        document.querySelectorAll('.keyboard-key.shift').forEach(shiftKey => {
+                            shiftKey.style.background = '#6c757d';
+                        });
+                    }
+                    
+                    // Check maxlength if specified
+                    const maxLength = currentInput.getAttribute('data-maxlength');
+                    if (!maxLength || currentInput.value.length < parseInt(maxLength)) {
+                        if (currentInput.type === 'email' && char === '@' && currentInput.value.includes('@')) {
+                            // Only one @ allowed in emails
+                            return;
+                        }
+                        currentInput.value += char;
+                    }
+                    break;
+            }
+            
+            // Trigger input event to update state
+            currentInput.dispatchEvent(new Event('input', { bubbles: true }));
+        }
+        
+        // NEW: PIN Functions
+        function setupPIN() {
+            const pinKeys = document.querySelectorAll('.pin-key[data-key]');
+            const pinClear = document.getElementById('pin-clear');
+            const pinEnter = document.getElementById('pin-enter');
+            
+            pinKeys.forEach(key => {
+                key.addEventListener('click', function() {
+                    const keyValue = this.getAttribute('data-key');
+                    handlePINInput(keyValue);
+                });
+            });
+            
+            pinClear.addEventListener('click', clearPIN);
+            pinEnter.addEventListener('click', validatePIN);
+        }
+        
+        function handlePINInput(key) {
+            if (pinInput.length < 4) {
+                pinInput += key;
+                updatePINDisplay();
+            }
+        }
+        
+        function clearPIN() {
+            pinInput = '';
+            updatePINDisplay();
+        }
+        
+        function updatePINDisplay() {
+            const display = document.getElementById('pin-display');
+            display.textContent = '*'.repeat(pinInput.length) + '•'.repeat(4 - pinInput.length);
+        }
+        
+        function validatePIN() {
+            if (pinInput === config.adminPIN) {
+                hidePinModal();
+                showAdminPanel();
+            } else {
+                alert('Invalid PIN. Please try again.');
+                clearPIN();
+            }
+        }
+        
+        function showPinModal() {
+            const pinModal = document.getElementById('pin-modal');
+            pinModal.classList.add('active');
+            clearPIN();
+        }
+        
+        function hidePinModal() {
+            const pinModal = document.getElementById('pin-modal');
+            pinModal.classList.remove('active');
+            clearPIN();
+        }
+        
+        // Admin functionality
+        let tapCount = 0;
+        let tapTimer = null;
+        
+        function setupAdminPanel() {
+            const adminCorner = document.getElementById('admin-corner');
+            const closeAdmin = document.getElementById('close-admin');
+            const cancelAdmin = document.getElementById('cancel-admin');
+            const saveAdmin = document.getElementById('save-admin');
+            
+            // Double-tap detection
+            adminCorner.addEventListener('click', function() {
+                tapCount++;
+                
+                if (tapCount === 1) {
+                    tapTimer = setTimeout(function() {
+                        tapCount = 0;
+                    }, 500);
+                } else if (tapCount === 2) {
+                    clearTimeout(tapTimer);
+                    tapCount = 0;
+                    showPinModal();
+                }
+            });
+            
+            // Close modal events
+            closeAdmin.addEventListener('click', hideAdminPanel);
+            cancelAdmin.addEventListener('click', hideAdminPanel);
+            
+            // Save admin settings
+            saveAdmin.addEventListener('click', saveAdminSettings);
+            
+            // Populate admin form with current settings
+            populateAdminForm();
+        }
+        
+        function showAdminPanel() {
+            const adminModal = document.getElementById('admin-modal');
+            adminModal.classList.add('active');
+            populateAdminForm();
+        }
+        
+        function hideAdminPanel() {
+            const adminModal = document.getElementById('admin-modal');
+            adminModal.classList.remove('active');
+        }
+        
+        function populateAdminForm() {
+            document.getElementById('admin-event-name').value = config.eventName;
+            document.getElementById('admin-support-email').value = config.supportEmail;
+            document.getElementById('admin-support-phone').value = config.supportPhone;
+            document.getElementById('admin-price-print').value = config.pricePerPrint;
+            document.getElementById('admin-price-email').value = config.pricePerEmail;
+            document.getElementById('admin-max-prints').value = config.maxPrints;
+            document.getElementById('admin-max-emails').value = config.maxEmails;
+            document.getElementById('admin-start-receipt').value = state.receiptNumber;
+        }
+        
+        function saveAdminSettings() {
+            // Update config with new values
+            config.eventName = document.getElementById('admin-event-name').value;
+            config.supportEmail = document.getElementById('admin-support-email').value;
+            config.supportPhone = document.getElementById('admin-support-phone').value;
+            config.pricePerPrint = parseFloat(document.getElementById('admin-price-print').value);
+            config.pricePerEmail = parseFloat(document.getElementById('admin-price-email').value);
+            config.maxPrints = parseInt(document.getElementById('admin-max-prints').value);
+            config.maxEmails = parseInt(document.getElementById('admin-max-emails').value);
+            state.receiptNumber = parseInt(document.getElementById('admin-start-receipt').value);
+            
+            // Update receipt display if we're on the receipt screen
+            if (document.getElementById('receipt-screen').classList.contains('active')) {
+                updateReceipt();
+            }
+            
+            // Update pricing display
+            updatePricing();
+            
+            // Show confirmation
+            alert('Admin settings saved successfully!');
+            
+            // Hide the admin panel
+            hideAdminPanel();
+        }
+        
+        // Screen navigation
+        function showScreen(screenId) {
+            // Hide virtual keyboard when changing screens
+            hideVirtualKeyboard();
+            
+            // Hide all screens
+            document.querySelectorAll('.screen').forEach(screen => {
+                screen.classList.remove('active');
+            });
+            
+            // Show the requested screen
+            document.getElementById(screenId).classList.add('active');
+            
+            // Show/hide reset button (don't show on welcome screen)
+            const resetButton = document.querySelector('.reset-button');
+            if (screenId === 'welcome-screen') {
+                resetButton.style.display = 'none';
+            } else {
+                resetButton.style.display = 'block';
+            }
+            
+            // Update summary if going to summary screen
+            if (screenId === 'summary-screen') {
+                updateSummary();
+            }
+            
+            // Update receipt if going to receipt screen
+            if (screenId === 'receipt-screen') {
+                updateReceipt();
+            }
+            
+            // Update confirmation if going to confirmation screen
+            if (screenId === 'confirmation-screen') {
+                updateConfirmation();
+            }
+            
+            // Update pricing if going to delivery screen
+            if (screenId === 'delivery-screen') {
+                updatePricing();
+            }
+            
+            // Update payment screen total if going to payment screen
+            if (screenId === 'payment-screen') {
+                document.getElementById('payment-total-price').textContent = `Total: $${state.totalPrice.toFixed(2)}`;
+            }
+            
+            // Generate email inputs if going to email screen
+            if (screenId === 'email-screen') {
+                generateEmailInputs();
+            }
+        }
+        
+        // Update pricing display
+        function updatePricing() {
+            // Calculate individual prices
+            const printsPrice = state.printCount * config.pricePerPrint;
+            const emailsPrice = state.emailCount * config.pricePerEmail;
+            
+            // Calculate total based on delivery method
+            let total = 0;
+            if (state.deliveryMethod === 'prints' || state.deliveryMethod === 'both') {
+                total += printsPrice;
+            }
+            if (state.deliveryMethod === 'email' || state.deliveryMethod === 'both') {
+                total += emailsPrice;
+            }
+            
+            // Update individual price displays
+            document.getElementById('prints-price').textContent = `$${printsPrice.toFixed(2)}`;
+            document.getElementById('emails-price').textContent = `$${emailsPrice.toFixed(2)}`;
+            
+            // Update total price display
+            document.getElementById('total-price-display').textContent = `Total: $${total.toFixed(2)}`;
+            
+            // Store total price in state
+            state.totalPrice = total;
+        }
+        
+        // Background category selection
+        function setupCategoryTabs() {
+            const tabs = document.querySelectorAll('.category-tab');
+            tabs.forEach(tab => {
+                tab.addEventListener('click', function() {
+                    // Remove active class from all tabs
+                    tabs.forEach(t => t.classList.remove('active'));
+                    
+                    // Add active class to clicked tab
+                    this.classList.add('active');
+                    
+                    // Hide all background categories
+                    document.querySelectorAll('.background-category').forEach(cat => {
+                        cat.classList.remove('active');
+                    });
+                    
+                    // Show selected category
+                    const categoryId = this.getAttribute('data-category');
+                    document.getElementById(`${categoryId}-category`).classList.add('active');
+                });
+            });
+        }
+        
+        // Background selection
+        function selectBackground(element, category, name, url) {
+            document.querySelectorAll('.background').forEach(bg => {
+                bg.classList.remove('selected');
+            });
+            element.classList.add('selected');
+            
+            state.background = {
+                category: category,
+                name: name,
+                url: url
+            };
+            
+            // Clear custom description when selecting a predefined background
+            if (category !== 'custom') {
+                document.getElementById('custom-bg-description').value = '';
+                state.customBackgroundDescription = '';
+            }
+        }
+        
+        // Option selection (delivery method)
+        function selectOption(element) {
+            const parent = element.parentElement;
+            parent.querySelectorAll('.option').forEach(opt => {
+                opt.classList.remove('selected');
+            });
+            element.classList.add('selected');
+            
+            // Update delivery method based on selected option
+            const optionText = element.querySelector('div:last-child').textContent;
+            if (optionText === 'Prints Only') state.deliveryMethod = 'prints';
+            else if (optionText === 'Email Only') state.deliveryMethod = 'email';
+            else state.deliveryMethod = 'both';
+            
+            // Show/hide print and email sections
+            document.getElementById('prints-section').style.display = 
+                (state.deliveryMethod === 'prints' || state.deliveryMethod === 'both') ? 'block' : 'none';
+            document.getElementById('emails-section').style.display = 
+                (state.deliveryMethod === 'email' || state.deliveryMethod === 'both') ? 'block' : 'none';
+            
+            // Update pricing
+            updatePricing();
+        }
+        
+        // Payment method selection
+        function selectPayment(element, method) {
+            document.querySelectorAll('.option').forEach(opt => {
+                opt.classList.remove('selected');
+            });
+            element.classList.add('selected');
+            state.paymentMethod = method;
+        }
+        
+        // Counter functions
+        function changePeopleCount(change) {
+            state.peopleCount = Math.max(1, state.peopleCount + change);
+            document.getElementById('people-count').textContent = state.peopleCount;
+        }
+        
+        function changePrintCount(change) {
+            state.printCount = Math.max(0, Math.min(config.maxPrints, state.printCount + change));
+            document.getElementById('print-count').textContent = state.printCount;
+            updatePricing();
+        }
+        
+        function changeEmailCount(change) {
+            state.emailCount = Math.max(0, Math.min(config.maxEmails, state.emailCount + change));
+            document.getElementById('email-count').textContent = state.emailCount;
+            updatePricing();
+        }
+        
+        // Update summary screen
+        function updateSummary() {
+            state.partyName = document.getElementById('party-name').value || 'Unknown';
+            state.customBackgroundDescription = document.getElementById('custom-bg-description').value || '';
+            
+            // Calculate total
+            let total = 0;
+            if (state.deliveryMethod === 'prints' || state.deliveryMethod === 'both') {
+                total += state.printCount * config.pricePerPrint;
+            }
+            if (state.deliveryMethod === 'email' || state.deliveryMethod === 'both') {
+                total += state.emailCount * config.pricePerEmail;
+            }
+            state.totalPrice = total;
+            
+            // Update summary display
+            document.getElementById('summary-name').textContent = state.partyName;
+            document.getElementById('summary-people').textContent = state.peopleCount;
+            document.getElementById('summary-background').textContent = state.background.name;
+            document.getElementById('summary-custom-bg').textContent = state.customBackgroundDescription || 'None';
+            document.getElementById('summary-prints').textContent = 
+                (state.deliveryMethod === 'prints' || state.deliveryMethod === 'both') ? state.printCount : 0;
+            document.getElementById('summary-emails').textContent = 
+                (state.deliveryMethod === 'email' || state.deliveryMethod === 'both') ? state.emailCount : 0;
+            document.getElementById('summary-payment').textContent = 
+                state.paymentMethod.charAt(0).toUpperCase() + state.paymentMethod.slice(1);
+            document.getElementById('summary-total').textContent = `$${state.totalPrice.toFixed(2)}`;
+        }
+        
+        // Email screen functions
+        function showEmailScreen() {
+            // Only show email screen if they want emails
+            if (state.deliveryMethod === 'email' || state.deliveryMethod === 'both') {
+                showScreen('email-screen');
+                generateEmailInputs();
+            } else {
+                // Skip email screen if they only want prints
+                showScreen('payment-screen');
+            }
+        }
+
+        function generateEmailInputs() {
+            const container = document.getElementById('email-inputs-container');
+            container.innerHTML = '';
+            
+            for (let i = 0; i < state.emailCount; i++) {
+                const inputGroup = document.createElement('div');
+                inputGroup.className = 'input-group';
+                
+                const label = document.createElement('label');
+                label.className = 'input-label';
+                label.textContent = `Email Address ${i + 1}`;
+                
+                const input = document.createElement('input');
+                input.type = 'email';
+                input.className = 'text-input email-input';
+                input.placeholder = 'Enter email address';
+                input.value = state.emailAddresses[i] || '';
+                input.onchange = (e) => {
+                    state.emailAddresses[i] = e.target.value;
+                };
+                
+                inputGroup.appendChild(label);
+                inputGroup.appendChild(input);
+                container.appendChild(inputGroup);
+            }
+            
+            // Re-attach keyboard event listeners to newly created email inputs
+            document.querySelectorAll('.email-input').forEach(input => {
+                input.addEventListener('focus', function() {
+                    showVirtualKeyboard(this);
+                });
+                
+                input.addEventListener('blur', function() {
+                    if (this !== currentInput) {
+                        hideVirtualKeyboard();
+                    }
+                });
+            });
+        }
+
+        function validateEmails() {
+            // Only validate if they want emails
+            if (state.deliveryMethod === 'email' || state.deliveryMethod === 'both') {
+                let valid = true;
+                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                const emailInputs = document.querySelectorAll('.email-input');
+                
+                emailInputs.forEach((input, index) => {
+                    if (!input.value || !emailRegex.test(input.value)) {
+                        valid = false;
+                        input.style.borderColor = 'red';
+                    } else {
+                        input.style.borderColor = '';
+                        state.emailAddresses[index] = input.value;
+                    }
+                });
+                
+                if (!valid) {
+                    alert('Please enter valid email addresses for all required fields.');
+                    return;
+                }
+            }
+            
+            showScreen('payment-screen');
+        }
+        
+        // Order confirmation function
+        function confirmOrder() {
+            showScreen('receipt-screen');
+        }
+        
+        // Update confirmation screen
+        function updateConfirmation() {
+            document.getElementById('confirmation-order-number').textContent = state.receiptNumber;
+        }
+        
+        // Print receipt function
+        function printReceipt() {
+            window.print();
+        }
+        
+        // Print receipt and continue to final screen
+        function printReceiptAndContinue() {
+            window.print();
+            showScreen('confirmation-screen');
+        }
+        
+        // Update receipt screen
+        function updateReceipt() {
+            const now = new Date();
+            const dateStr = `${now.getMonth()+1}/${now.getDate()}/${now.getFullYear()}`;
+            const timeStr = now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+            
+            // Customer receipt
+            document.getElementById('receipt-name').textContent = state.partyName;
+            document.getElementById('receipt-time').textContent = timeStr;
+            document.getElementById('receipt-date').textContent = dateStr;
+            document.getElementById('receipt-bg-name').textContent = state.background.name;
+            document.getElementById('receipt-custom-bg').textContent = state.customBackgroundDescription || 'None';
+            document.getElementById('receipt-bg-image').src = state.background.url;
+            document.getElementById('receipt-prints').textContent = 
+                (state.deliveryMethod === 'prints' || state.deliveryMethod === 'both') ? state.printCount : 0;
+            document.getElementById('receipt-emails').textContent = 
+                (state.deliveryMethod === 'email' || state.deliveryMethod === 'both') ? state.emailCount : 0;
+            document.getElementById('receipt-payment').textContent = 
+                state.paymentMethod.charAt(0).toUpperCase() + state.paymentMethod.slice(1);
+            document.getElementById('receipt-number').textContent = state.receiptNumber;
+            document.getElementById('receipt-event').textContent = config.eventName;
+            document.getElementById('receipt-support-email').textContent = config.supportEmail;
+            document.getElementById('receipt-support-phone').textContent = config.supportPhone;
+            document.getElementById('receipt-help-email').textContent = config.helpEmail;
+            
+            // Cameraman receipt
+            document.getElementById('cam-receipt-name').textContent = state.partyName;
+            document.getElementById('cam-receipt-delivery').textContent = state.deliveryMethod;
+            document.getElementById('cam-receipt-time').textContent = timeStr;
+            document.getElementById('cam-receipt-date').textContent = dateStr;
+            document.getElementById('cam-receipt-people').textContent = state.peopleCount;
+            document.getElementById('cam-receipt-bg').textContent = state.background.name;
+            document.getElementById('cam-receipt-custom-bg').textContent = state.customBackgroundDescription || 'None';
+            document.getElementById('cam-receipt-bg-image').src = state.background.url;
+            document.getElementById('cam-receipt-emails').textContent = state.emailAddresses.join(', ');
+            document.getElementById('cam-receipt-email-count').textContent = 
+                (state.deliveryMethod === 'email' || state.deliveryMethod === 'both') ? state.emailCount : 0;
+            document.getElementById('cam-receipt-print-count').textContent = 
+                (state.deliveryMethod === 'prints' || state.deliveryMethod === 'both') ? state.printCount : 0;
+            document.getElementById('cam-receipt-photo-number').textContent = state.receiptNumber;
+            
+            // Increment receipt number for next customer
+            state.receiptNumber++;
+        }
+        
+        // Start over function
+        function startOver() {
+            // Hide virtual keyboard
+            hideVirtualKeyboard();
+            
+            // Reset state
+            state.background = {
+                category: 'background',
+                name: 'Beach Sunset',
+                url: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80'
+            };
+            state.partyName = '';
+            state.peopleCount = 1;
+            state.deliveryMethod = 'prints';
+            state.printCount = 1;
+            state.emailCount = 1;
+            state.paymentMethod = 'cash';
+            state.totalPrice = 0;
+            state.emailAddresses = [];
+            state.webcamPhoto = null;
+            state.customBackgroundDescription = '';
+            
+            // Reset UI
+            document.getElementById('party-name').value = '';
+            document.getElementById('people-count').textContent = '1';
+            document.getElementById('print-count').textContent = '1';
+            document.getElementById('email-count').textContent = '1';
+            document.getElementById('custom-bg-description').value = '';
+            
+            // Reset background selection
+            document.querySelectorAll('.background').forEach(bg => {
+                bg.classList.remove('selected');
+            });
+            document.querySelector('.background').classList.add('selected');
+            
+            // Reset category tabs
+            document.querySelectorAll('.category-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.querySelector('.category-tab').classList.add('active');
+            
+            document.querySelectorAll('.background-category').forEach(cat => {
+                cat.classList.remove('active');
+            });
+            document.getElementById('background-category').classList.add('active');
+            
+            // Hide reset button on welcome screen
+            document.querySelector('.reset-button').style.display = 'none';
+            
+            // Go back to welcome screen
+            showScreen('welcome-screen');
+        }
+        
+        // Background preview functionality
+        document.querySelectorAll('.background').forEach(bg => {
+            bg.addEventListener('click', function() {
+                // Grab the background-image of the inner div
+                const url = this.querySelector('.bg-preview').style.backgroundImage;
+                const cleanUrl = url.slice(5, -2); // remove url("...")
+
+                // Show preview
+                const overlay = document.getElementById('bg-preview-overlay');
+                const img = document.getElementById('bg-preview-image');
+                img.src = cleanUrl;
+                overlay.style.display = 'flex';
+            });
+        });
+  
+        document.getElementById('close-preview').onclick = function() {
+            document.getElementById('bg-preview-overlay').style.display = 'none';
+        };
+        
+        // Initialize the app
+        window.onload = function() {
+            // Set initial display for print/email sections
+            document.getElementById('prints-section').style.display = 'block';
+            document.getElementById('emails-section').style.display = 'none';
+            
+            // Set up category tabs
+            setupCategoryTabs();
+            
+            // Set up admin panel
+            setupAdminPanel();
+            
+            // Set up virtual keyboard
+            setupVirtualKeyboard();
+            
+            // Set up PIN system
+            setupPIN();
+            
+            // Set up custom background description
+            document.getElementById('custom-bg-description').addEventListener('input', function() {
+                state.customBackgroundDescription = this.value;
+                // If user starts typing in custom description, select the custom background
+                if (this.value.trim() !== '') {
+                    const customBg = document.querySelector('.background[data-category="custom"]');
+                    if (customBg) {
+                        selectBackground(customBg, 'custom', 'Custom Background', '');
+                    }
+                }
+            });
+        };
+    </script>
+</body>
+</html>
