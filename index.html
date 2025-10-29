@@ -1333,11 +1333,24 @@
                 
                 <div class="nav-buttons">
                     <button class="btn btn-secondary" onclick="showScreen('background-screen')">Back</button>
-                    <button class="btn" onclick="showScreen('delivery-screen')">Continue</button>
+                    <!--<button class="btn" onclick="showScreen('delivery-screen')">Continue</button>-->
+                    <button class="btn" onclick="validatePartyDetails()">Continue</button>
                 </div>
             </div>
         </div>
+<script>
+function validatePartyDetails() {
+    const partyName = document.getElementById('party-name').value.trim();
 
+    if (partyName === '') {
+        alert('Please enter a party name before continuing.');
+        return; // stop here
+    }
+
+    // If input is valid, move to the next screen
+    showScreen('delivery-screen');
+}
+</script>
         <!-- Delivery Options Screen -->
         <div class="screen" id="delivery-screen">
             <div class="header">
