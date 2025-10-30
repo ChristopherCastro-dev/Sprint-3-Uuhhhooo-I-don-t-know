@@ -1553,6 +1553,10 @@ function validatePartyDetails() {
                             <span>Payment:</span>
                             <span id="receipt-payment">Cash</span>
                         </div>
+                            <div class="receipt-line total">
+  <span><strong>Total:</strong></span>
+  <span id="receipt-total">$0.00</span>
+</div>
                         
                         <div class="stamp-area">
                             <div class="stamp">PAID</div>
@@ -1631,7 +1635,10 @@ function validatePartyDetails() {
                             <span>Photo #:</span>
                             <span id="cam-receipt-photo-number" style="font-size: 1.5rem; font-weight: bold;">621</span>
                         </div>
-                        
+                                 <div class="receipt-line total">
+  <span><strong>Total:</strong></span>
+  <span id="cam-receipt-total">$0.00</span>
+</div>   
                         <div class="stamp-area">
                             <div class="stamp">PAID</div>
                             <div class="stamp">PHOTO TAKEN</div>
@@ -2343,6 +2350,9 @@ function validatePartyDetails() {
             document.getElementById('cam-receipt-print-count').textContent = 
                 (state.deliveryMethod === 'prints' || state.deliveryMethod === 'both') ? state.printCount : 0;
             document.getElementById('cam-receipt-photo-number').textContent = state.receiptNumber;
+            // Add total to both receipts
+document.getElementById('receipt-total').textContent = `$${state.totalPrice.toFixed(2)}`;
+document.getElementById('cam-receipt-total').textContent = `$${state.totalPrice.toFixed(2)}`;
             
             // Increment receipt number for next customer
             state.receiptNumber++;
