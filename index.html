@@ -1486,7 +1486,7 @@ function validatePartyDetails() {
                         <span id="summary-emails">0</span>
                     </div>
                     <div class="receipt-line">
-                        <span>Payment:</span>
+                        <span>Payment Method:</span>
                         <span id="summary-payment">Cash</span>
                     </div>
                     <div class="receipt-line">
@@ -1513,6 +1513,10 @@ function validatePartyDetails() {
                     <!-- Customer Receipt -->
                     <div class="receipt-part customer">
                         <h3 style="text-align: center; color: #4facfe;">CUSTOMER COPY</h3>
+                         <div class="receipt-line">
+                            <span>Customer #:</span>
+                            <span id="receipt-number" style="font-size: 1.5rem; font-weight: bold;">621</span>
+                        </div>
                         <div class="receipt-line">
                             <span>Name:</span>
                             <span id="receipt-name">-</span>
@@ -1544,15 +1548,15 @@ function validatePartyDetails() {
                         </div>
                         
                         <div class="receipt-line">
-                            <span>Prints:</span>
+                            <span>Number of Prints:</span>
                             <span id="receipt-prints">0</span>
                         </div>
                         <div class="receipt-line">
-                            <span>Emails:</span>
+                            <span>Number of Emails:</span>
                             <span id="receipt-emails">0</span>
                         </div>
                         <div class="receipt-line">
-                            <span>Payment:</span>
+                            <span>Payment Method:</span>
                             <span id="receipt-payment">Cash</span>
                         </div>
                             <div class="receipt-line total">
@@ -1576,16 +1580,16 @@ function validatePartyDetails() {
                         <div class="instructions">
                             <strong>Questions?</strong> Call <span id="receipt-support-phone">(555) 123-4567</span> or email <span id="receipt-help-email">help@photofun.com</span>
                         </div>
-                        
-                        <div class="receipt-line">
-                            <span>Customer #:</span>
-                            <span id="receipt-number">621</span>
-                        </div>
+                       
                     </div>
                     
                     <!-- Cameraman Receipt -->
                     <div class="receipt-part cameraman">
                         <h3 style="text-align: center; color: #ff6b6b;">CAMERAMAN COPY</h3>
+                        <div class="receipt-line">
+                            <span>Photo #:</span>
+                            <span id="cam-receipt-photo-number" style="font-size: 1.5rem; font-weight: bold;">621</span>
+                        </div>
                         <div class="receipt-line">
                             <span>Name:</span>
                             <span id="cam-receipt-name">-</span>
@@ -1615,28 +1619,23 @@ function validatePartyDetails() {
                             <span id="cam-receipt-custom-bg">-</span>
                         </div>
                         
-                        <!-- Background Preview on Cameraman Receipt -->
+                       <!-- Background Preview on Cameraman Receipt -->
                         <div class="receipt-bg-preview">
                             <img id="cam-receipt-bg-image" src="" alt="Selected Background">
                         </div>
-                        
+                        <div class="receipt-line">
+                            <span>Number of Prints:</span>
+                            <span id="cam-receipt-print-count">0</span>
+                        </div>
+                        <div class="receipt-line">
+                            <span>Number of Emails:</span>
+                            <span id="cam-receipt-email-count">0</span>
+                        </div>
                         <div class="receipt-line">
                             <span>Emails:</span>
                             <span id="cam-receipt-emails">-</span>
                         </div>
-                        <div class="receipt-line">
-                            <span># Emails:</span>
-                            <span id="cam-receipt-email-count">0</span>
-                        </div>
-                        <div class="receipt-line">
-                            <span># Prints:</span>
-                            <span id="cam-receipt-print-count">0</span>
-                        </div>
                         
-                        <div class="receipt-line">
-                            <span>Photo #:</span>
-                            <span id="cam-receipt-photo-number" style="font-size: 1.5rem; font-weight: bold;">621</span>
-                        </div>
                                  <div class="receipt-line total">
   <span><strong>Total:</strong></span>
   <span id="cam-receipt-total">$0.00</span>
